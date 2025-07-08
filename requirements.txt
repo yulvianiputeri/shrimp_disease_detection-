@@ -9,3 +9,4 @@ seaborn
 Pillow
 scikit-image
 joblib
+plotly
