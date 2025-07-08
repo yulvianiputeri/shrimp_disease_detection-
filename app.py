@@ -31,8 +31,8 @@ if menu == "📷 Predict":
         knn_pred = knn.predict(features_pca)[0]
         svm_pred = svm.predict(features_pca)[0]
         st.markdown("---")
-        st.markdown(f"### 🔵 KNN Prediction: {'✅ **Healthy**' if knn_pred==0 else '❌ **Sick**'}")
-        st.markdown(f"### 🔴 SVM Prediction: {'✅ **Healthy**' if svm_pred==0 else '❌ **Sick**'}")
+        st.markdown(f"### 🔵 KNN Prediction: {'✅ **Healthy**' if knn_pred==0 else '❌ **Disease**'}")
+        st.markdown(f"### 🔴 SVM Prediction: {'✅ **Healthy**' if svm_pred==0 else '❌ **Disease**'}")
 
 elif menu == "🖼️ Gallery":
     st.title("🖼️ Shrimp Gallery")
@@ -43,10 +43,10 @@ elif menu == "🖼️ Gallery":
         with cols[i%3]:
             st.image(img, caption=f"✅ {label}", use_container_width=True)
     st.markdown("---")
-    st.subheader("❌ Sick Shrimp Examples")
-    sick_images = load_gallery_images("3. WSSV", "Sick") + load_gallery_images("4. WSSV_BG", "Sick")
+    st.subheader("❌ Disease Shrimp Examples")
+    Disease_images = load_gallery_images("3. WSSV", "Disease") + load_gallery_images("4. WSSV_BG", "Disease")
     cols = st.columns(3)
-    for i, (img, label) in enumerate(sick_images):
+    for i, (img, label) in enumerate(Disease_images):
         with cols[i%3]:
             st.image(img, caption=f"❌ {label}", use_container_width=True)
 
