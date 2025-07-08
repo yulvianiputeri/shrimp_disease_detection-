@@ -1,0 +1,11 @@
+streamlit
+pandas
+numpy
+scikit-learn
+opencv-python
+mahotas
+matplotlib
+seaborn
+Pillow
+scikit-image
+joblib
