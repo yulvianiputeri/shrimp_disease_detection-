@@ -7,12 +7,10 @@ def buat_dataset_csv():
     folder_data = 'data_udang'
     file_csv = 'shrimp_dataset.csv'
     
-    # Cek apakah folder dataset ada
     if not os.path.exists(folder_data):
         print(f"Error: Folder '{folder_data}' tidak ditemukan!")
         return False
     
-    # Mapping nama folder ke label yang lebih jelas
     mapping_folder = {
         '1. Healthy': 'Healthy',
         '2. BG': 'BG',
@@ -35,18 +33,15 @@ def buat_dataset_csv():
                 if not os.path.isdir(path_folder):
                     continue
                     
-                # Dapatkan label dari mapping atau ekstrak dari nama folder
                 label = mapping_folder.get(nama_folder, nama_folder.split('. ', 1)[-1])
                 
-                # Hitung jumlah gambar dalam folder
                 gambar_dalam_folder = 0
                 
                 for nama_file in os.listdir(path_folder):
-                    # Filter hanya file gambar
+
                     if nama_file.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp')):
                         path_gambar = os.path.join(path_folder, nama_file)
                         
-                        # Cek apakah file benar-benar ada
                         if os.path.isfile(path_gambar):
                             writer.writerow([path_gambar, label])
                             gambar_dalam_folder += 1
@@ -79,7 +74,6 @@ def verifikasi_dataset():
         print(f"Distribusi label:")
         print(df['label'].value_counts())
         
-        # Cek file gambar yang hilang
         file_hilang = 0
         for path in df['image_path']:
             if not os.path.exists(path):
@@ -94,9 +88,7 @@ def verifikasi_dataset():
         print(f"Error saat verifikasi: {e}")
 
 if __name__ == "__main__":
-    # Buat dataset CSV
     if buat_dataset_csv():
-        # Verifikasi hasil
         verifikasi_dataset()
     else:
         print("Gagal membuat dataset CSV!")

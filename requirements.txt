@@ -10,3 +10,4 @@ Pillow
 scikit-image
 joblib
 plotly
+mahotas

@@ -1,76 +1,54 @@
-
 import numpy as np
 import pandas as pd
 import os
 from PIL import Image
 import cv2
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.calibration import CalibratedClassifierCV
 import joblib
 import matplotlib.pyplot as plt
+import seaborn as sns
+from preprocessing import load_and_preprocess_data
+from model import bandingkan_model
 from utils import extract_features_single
 
-# Load images & labels
-images = []
-labels = []
-for folder, label_val in [("1. Healthy", 0), ("2. BG", 1), ("3. WSSV", 1), ("4. WSSV_BG", 1)]:
-    path = os.path.join("data_udang", folder)
-    for fname in os.listdir(path):
-        img_path = os.path.join(path, fname)
-        try:
-            img = Image.open(img_path).convert('RGB').resize((128,128))
-            images.append(np.array(img))
-            labels.append(label_val)
-        except:
-            continue
-images = np.array(images)
-labels = np.array(labels)
+print("Starting model training process...")
 
-# Extract features
-features = np.array([extract_features_single(img) for img in images])
+X_train, X_test, y_train, y_test, scaler, pca = load_and_preprocess_data()
+print(f"Data loaded and preprocessed. X_train shape: {X_train.shape}, y_train shape: {y_train.shape}")
 
-# Scale + PCA
-scaler = StandardScaler()
-features_scaled = scaler.fit_transform(features)
-pca = PCA(n_components=10)
-features_pca = pca.fit_transform(features_scaled)
+plt.figure(figsize=(10, 8))
 
-# Scatter plot
-plt.figure(figsize=(8,6))
-for i in range(len(features_pca)):
-    if labels[i] == 0:
-        plt.scatter(features_pca[i,0], features_pca[i,1], color='blue', label='Healthy' if i==0 else "")
-    else:
-        plt.scatter(features_pca[i,0], features_pca[i,1], color='red', label='Diseased' if i==len(labels)//2 else "")
+X_pca_healthy = X_train[y_train == 0]
+X_pca_diseased = X_train[y_train == 1]
+
+plt.scatter(X_pca_healthy[:, 0], X_pca_healthy[:, 1], color='blue', label='Healthy', alpha=0.6)
+plt.scatter(X_pca_diseased[:, 0], X_pca_diseased[:, 1], color='red', label='Diseased', alpha=0.6)
+
 plt.xlabel("PCA Component 1")
 plt.ylabel("PCA Component 2")
-plt.title("PCA Feature Space of Shrimp Dataset")
+plt.title("PCA Feature Space of Shrimp Dataset (Training Data)")
 plt.legend()
 plt.grid(True)
-plt.savefig("pca_clusters.png")
+plt.tight_layout()
+plt.savefig("pca_clusters_augmented.png")
 plt.close()
+print("PCA scatter plot saved as pca_clusters_augmented.png.")
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(features_pca, labels, test_size=0.2, random_state=42)
 
-# Train models with calibration
-knn = KNeighborsClassifier(n_neighbors=3)
-knn_calib = CalibratedClassifierCV(knn, cv=3)
-knn_calib.fit(X_train, y_train)
+print("\nInitiating model training and comparison...")
+hasil_model = bandingkan_model(X_train, y_train, X_test, y_test)
 
-svm = SVC(kernel='rbf', probability=True)
-svm_calib = CalibratedClassifierCV(svm, cv=3)
-svm_calib.fit(X_train, y_train)
+knn_model = hasil_model['KNN']['model']
+svm_model = hasil_model['SVM']['model']
 
-# Save models
-joblib.dump(knn_calib, "knn_model.pkl")
-joblib.dump(svm_calib, "svm_model.pkl")
+print("\nSaving trained models and preprocessing objects...")
+joblib.dump(knn_model, "knn_model.pkl")
+joblib.dump(svm_model, "svm_model.pkl")
 joblib.dump(scaler, "scaler.pkl")
 joblib.dump(pca, "pca.pkl")
 
-print("Models trained and saved with calibrated probabilities.")
-print("PCA scatter plot saved as pca_clusters.png.")
+joblib.dump(X_test, "X_test.pkl")
+joblib.dump(y_test, "y_test.pkl")
+print("X_test and y_test saved successfully for consistent evaluation.")
+
+print("Models (knn_model.pkl, svm_model.pkl) and preprocessing objects (scaler.pkl, pca.pkl) saved successfully.")
+print("Training process completed.")
